@@ -1,0 +1,40 @@
+esphome:
+  name: chain-release
+
+esp32:
+  board: esp32dev
+
+logger:
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+api:
+  encryption:
+    key: !secret api_key
+
+output:
+  - platform: ledc
+    id: servo_pwm
+    pin: GPIO18
+    frequency: 50Hz
+
+servo:
+  - id: spool
+    output: servo_pwm
+    transition_length: 1s
+    auto_detach_time: 2s
+
+number:
+  - platform: template
+    name: "Chain cord position"
+    min_value: -100
+    max_value: 100
+    step: 5
+    initial_value: 0
+    optimistic: true
+    set_action:
+      - servo.write:
+          id: spool
+          level: !lambda "return x / 100.0;"
